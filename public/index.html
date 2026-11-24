@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="css/control.css">
+</head>
+<body>
+<header class="nav"><span class="mark">P/O</span> Pass Live <span class="tag">OBS overlay for MyFundedPerps</span><span class="status" id="status">connecting…</span></header>
+<main>
+  <section class="intro">
+    <h1>Your challenge, <em>live on stream.</em></h1>
+    <p>Equity against the target and the limits, every fill as it happens, and a warning before you blow the account. Add it to OBS as a Browser Source.</p>
+  </section>
+  <div class="grid">
+    <form class="card" id="opts" autocomplete="off">
+      <h2>1 · Pick the look</h2>
+      <label>Account <select id="account"></select></label>
+      <label>Layout <select id="layout"><option value="card">Card (corner)</option><option value="bar">Bar (top strip)</option></select></label>
+      <div class="row">
+        <label>Corner <select id="corner"><option value="left">Left</option><option value="right">Right</option></select></label>
+        <label>Position <select id="pos"><option value="bottom">Bottom</option><option value="top">Top</option></select></label>
+      </div>
+      <div class="row">
+        <label>Theme <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+        <label>Size <select id="scale"><option value="0.8">Small</option><option value="1" selected>Normal</option><option value="1.3">Large</option></select></label>
+      </div>
+      <h2>2 · Add it to OBS</h2>
+      <ol class="steps">
+        <li>Sources → <b>+</b> → <b>Browser</b></li>
+        <li>Paste this URL, set width <b>1920</b> and height <b>1080</b></li>
+      </ol>
+      <div class="url"><code id="url"></code><button type="button" id="copy">Copy</button></div>
+      <p class="note" id="copied" aria-live="polite"></p>
+    </form>
+    <section class="card preview">
+      <h2>Preview</h2>
+      <div class="screen"><iframe id="frame" title="Overlay preview" src="about:blank"></iframe></div>
+      <p class="note">Your API key stays in this app on your computer. The overlay only receives numbers.</p>
+    </section>
+  </div>
+</main>
+<script type="module" src="js/control.js"></script>
+</body>
+</html>

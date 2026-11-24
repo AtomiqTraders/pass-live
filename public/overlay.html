@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass Live overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="css/overlay.css">
+</head>
+<body>
+<div id="stage">
+  <div id="toasts" aria-live="polite"></div>
+  <section id="panel" class="panel" hidden>
+    <div id="alert" class="alert" hidden></div>
+    <header class="head">
+      <span class="mark">P/O</span>
+      <span class="brand">Pass Live</span>
+      <span class="acct" id="acct">–</span>
+      <span class="live" id="live"><i></i><b>LIVE</b></span>
+    </header>
+    <div class="equity-row">
+      <div class="equity" id="equity">–</div>
+      <div class="pnl" id="pnl"></div>
+    </div>
+    <canvas id="spark" class="spark" width="1120" height="200"></canvas>
+    <div class="meters">
+      <div class="meter target"><span class="lbl">Target</span><span class="track"><span class="fill" id="m-target"></span></span><span class="val" id="v-target">–</span></div>
+      <div class="meter daily"><span class="lbl">Daily loss</span><span class="track"><span class="fill" id="m-daily"></span></span><span class="val" id="v-daily">–</span></div>
+      <div class="meter dd"><span class="lbl">Max DD</span><span class="track"><span class="fill" id="m-dd"></span></span><span class="val" id="v-dd">–</span></div>
+    </div>
+    <footer class="today" id="today"></footer>
+  </section>
+  <div id="burst" class="burst" hidden></div>
+</div>
+<script type="module" src="js/overlay.js"></script>
+</body>
+</html>

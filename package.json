@@ -1,0 +1,13 @@
+{
+  "name": "pass-live",
+  "version": "0.1.0",
+  "description": "OBS overlay for MyFundedPerps traders: live equity, limits and fills on stream.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node server.js --demo",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
