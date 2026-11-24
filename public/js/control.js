@@ -70,19 +70,29 @@ $('key-form').addEventListener('submit', async (e) => {
   try { S = await post('/api/key', { key: k }); $('key').value = ''; $('key-msg').textContent = `Connected (${S.mode}). ${S.accounts.length} account(s) found.`; $('key-msg').className = 'msg ok'; loadedForm = false; render(); }
   catch (err) { $('key-msg').textContent = err.message; $('key-msg').className = 'msg bad'; }
 });
+// In-page confirmation. The browser's own confirm() pop-up is silently dismissed in
+// some browsers (embedded panes, OBS docks), which made the switch untick itself.
+function ask(text, yes = 'Yes') {
+  return new Promise((done) => {
+    const d = $('ask'); $('ask-text').textContent = text; $('ask-yes').textContent = yes;
+    const end = (v) => { d.close(); $('ask-yes').onclick = $('ask-no').onclick = d.oncancel = null; done(v); };
+    $('ask-yes').onclick = () => end(true); $('ask-no').onclick = () => end(false); d.oncancel = (e) => { e.preventDefault(); end(false); };
+    d.showModal(); $('ask-no').focus();
+  });
+}
 // the real-orders switch saves straight away, so it can't be left half-changed
 $('tv-enabled').addEventListener('change', () => $('tv-form').requestSubmit());
 $('tv-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const enabled = $('tv-enabled').checked;
-  if (enabled && !S.bridge.enabled && !confirm(`Send REAL orders from TradingView alerts to your ${S.mode} account?\n\nMax order $${$('tv-max').value}, ${$('tv-lev').value}x leverage. You can switch back to dry run any time.`)) { $('tv-enabled').checked = false; return; }
+  if (enabled && !S.bridge.enabled && !(await ask(`Send REAL orders from TradingView alerts to your ${S.mode} account? Max order $${$('tv-max').value}, ${$('tv-lev').value}x leverage. You can switch back to dry run any time.`, 'Yes, send real orders'))) { $('tv-enabled').checked = false; $('tv-msg').textContent = 'Still in dry run.'; $('tv-msg').className = 'msg'; return; }
   try {
     S = await post('/api/bridge', { enabled, accountId: $('tv-account').value, maxOrderUsd: +$('tv-max').value, maxLeverage: +$('tv-lev').value, blockAt: +$('tv-block').value, allowed: $('tv-allowed').value });
     $('tv-msg').textContent = enabled ? 'Saved. Alerts now send real orders.' : 'Saved. Dry run: alerts are checked but nothing is sent.'; $('tv-msg').className = 'msg ok'; render();
   } catch (err) { $('tv-msg').textContent = err.message; $('tv-msg').className = 'msg bad'; }
 });
 $('new-secret').addEventListener('click', async () => {
-  if (!confirm('Make a new passphrase? Alerts using the old one will stop working until you update them in TradingView.')) return;
+  if (!(await ask('Make a new passphrase? Alerts using the old one will stop working until you update them in TradingView.', 'Make a new one'))) return;
   S = await post('/api/bridge', { newSecret: true }); render();
 });
 $('test-alert').addEventListener('click', async () => {

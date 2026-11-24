@@ -53,3 +53,7 @@ button:hover { filter: brightness(1.08); }
 .alerts .t { color: var(--muted); } .alerts .s { font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: .06em; }
 .alerts .sent .s { color: var(--lime); } .alerts .dry .s { color: var(--muted); } .alerts .blocked .s { color: var(--amber); } .alerts .error .s { color: var(--red); }
 footer { color: var(--muted); font-size: 13px; text-align: center; padding-top: 10px; }
+dialog#ask { max-width: 440px; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+dialog#ask::backdrop { background: rgba(0,0,0,.6); }
+#ask-text { margin: 0 0 18px; font-size: 16px; line-height: 1.5; }
+.ask-buttons { display: flex; gap: 8px; justify-content: flex-end; }
