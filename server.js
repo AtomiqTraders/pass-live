@@ -187,10 +187,12 @@ function recordAlert(entry) {
   const id = bridge().accountId || defaultAccount(); if (id) send(id, 'tv', { status: entry.status, text: entry.text });
   log(`TradingView ${entry.status}: ${entry.text}`);
 }
+function passOf(raw) { try { const a = typeof raw === 'string' ? JSON.parse(raw) : raw; return a && typeof a === 'object' ? a.passphrase : undefined; } catch { return undefined; } }
 async function handleAlert(raw, ip, { dry = false } = {}) {
   const cfg = { ...bridge(), ...(dry ? { enabled: false } : {}) };
+  // passphrase first, so strangers can't even fill the alerts list with errors
+  if (!sameSecret(passOf(raw), cfg.secret)) { log(`TradingView alert with a wrong passphrase from ${ip}`); return { ok: false, status: 'error', text: 'bad passphrase' }; }
   let intent; try { intent = parseAlert(raw); } catch (e) { recordAlert({ status: 'error', text: e.message, ip }); return { ok: false, status: 'error', text: e.message }; }
-  if (!sameSecret(intent.passphrase, cfg.secret)) { log(`TradingView alert with a wrong passphrase from ${ip}`); return { ok: false, status: 'error', text: 'bad passphrase' }; }
   const key = alertKey(intent), now = Date.now();
   for (const [k, t] of seenAlerts) if (now - t > 120000) seenAlerts.delete(k);
   if (seenAlerts.has(key)) { log('duplicate TradingView alert ignored'); return { ok: true, status: 'duplicate', text: 'Same alert already handled' }; }
@@ -212,8 +214,7 @@ const hook = http.createServer((req, res) => {
   req.on('end', () => {
     if (res.writableEnded) return;
     const raw = Buffer.concat(chunks).toString('utf8');
-    let pre = null; try { pre = parseAlert(raw); } catch {}
-    if (pre && !sameSecret(pre.passphrase, bridge().secret)) { res.writeHead(401).end('bad passphrase'); log(`rejected alert (wrong passphrase) from ${ip}`); return; }
+    if (!sameSecret(passOf(raw), bridge().secret)) { res.writeHead(401).end('bad passphrase'); log(`rejected alert (wrong passphrase) from ${ip}`); return; }
     // answer TradingView straight away (it gives up after a few seconds), then do the work
     res.writeHead(202, { 'Content-Type': 'application/json' }).end('{"ok":true}');
     handleAlert(raw, ip).catch((e) => recordAlert({ status: 'error', text: e.message }));

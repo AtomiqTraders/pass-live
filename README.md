@@ -67,6 +67,9 @@ TradingView webhooks need a **paid TradingView plan**.
 
 1. **Choose your guards** on the Setup page: the account, max order value ($), max leverage, the point at which new trades pause (e.g. 80% of the daily loss limit used), and optionally the only symbols allowed.
 2. **Start a tunnel** so TradingView can reach your computer. Alerts come in on port **4748**:
+   - **localhost.run** (no sign-up, nothing to install, works on networks that block the others):
+     `ssh -R 80:localhost:4748 nokey@localhost.run`
+     Webhook URL: the `https://….lhr.life` address it prints, plus `/tv`. The address changes now and then; update your alert when it does.
    - **ngrok** (same address every time): sign up free, claim your static domain, then
      `ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748`
      Webhook URL: `https://YOUR-DOMAIN.ngrok-free.app/tv`

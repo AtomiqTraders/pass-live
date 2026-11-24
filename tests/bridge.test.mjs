@@ -118,6 +118,14 @@ test('a wrong passphrase is refused and never trades', async () => {
   assert.equal(r.status, 401); await wait(200); assert.equal(orders().length, 1);
 });
 
+test('a broken alert with a wrong passphrase is refused before anything else', async () => {
+  for (const body of [{ passphrase: 'nope', action: 'buy', symbol: 'BTCUSDT' }, { action: 'wat' }, 'not json']) {
+    const r = await alert(body); assert.equal(r.status, 401);
+  }
+  const st = await (await fetch(`http://localhost:${appPort}/api/status`)).json();
+  assert.ok(!st.alerts.some((x) => /size|Unknown action|must be JSON/.test(x.text)));
+});
+
 test('close finds the open position and closes it', async () => {
   await alert({ passphrase: 's3cret', action: 'close', symbol: 'BTCUSDT', id: 'c1' }); await wait(400);
   assert.ok(calls.some((c) => c.method === 'POST' && c.path === '/positions/pos1/close' && c.key));

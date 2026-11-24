@@ -99,6 +99,14 @@
     <p class="note">TradingView sends alerts over the internet, so it needs a public web address that forwards to Pass Live (port <b id="hook-port">4748</b>). A free tunnel does that. Use one:</p>
     <div class="os">
       <div>
+        <h4>localhost.run (no sign-up, works where others are blocked)</h4>
+        <ol class="steps">
+          <li>Nothing to install: Windows 10/11, Linux and macOS have <code>ssh</code> built in.</li>
+          <li>Run: <code class="cmd">ssh -R 80:localhost:4748 nokey@localhost.run</code> (type <b>yes</b> the first time)</li>
+          <li>Webhook URL: the <code>https://….lhr.life</code> address it prints, plus <code>/tv</code>. The address changes now and then; update your alert when it does.</li>
+        </ol>
+      </div>
+      <div>
         <h4>ngrok (same address every time)</h4>
         <ol class="steps">
           <li>Sign up free at <a href="https://ngrok.com" target="_blank" rel="noopener">ngrok.com</a>, install it, and claim your free static domain.</li>
