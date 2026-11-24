@@ -55,7 +55,7 @@ Open http://localhost:4747 to see it with a demo account.
 
 Sources → **+** → **Browser** → paste the URL → width **1920**, height **1080**. The page is transparent; only the panel shows.
 
-URL options: `layout=card|bar`, `corner=left|right`, `pos=bottom|top`, `theme=dark|light`, `scale=0.8|1|1.3`, `account=<id>`.
+URL options: `layout=card|bar`, `corner=left|right`, `pos=bottom|top`, `theme=dark|light`, `scale=0.8|1|1.3`, `account=<id>`. Demo only: `demo`, `from=<seconds>` (start partway through the demo day), `speed=<x>`.
 
 ## Security
 
