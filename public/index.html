@@ -99,7 +99,8 @@
     <p class="note">TradingView sends alerts over the internet, so it needs a public web address that forwards to Pass Live (port <b id="hook-port">4748</b>). A free tunnel does that. Use one:</p>
     <div class="os">
       <div>
-        <h4>localhost.run (no sign-up, works where others are blocked)</h4>
+        <h4>localhost.run <span class="pill">Recommended</span></h4>
+        <p class="note">The one we use: no sign-up, and it works on networks that block the others.</p>
         <ol class="steps">
           <li>Nothing to install: Windows 10/11, Linux and macOS have <code>ssh</code> built in.</li>
           <li>Run: <code class="cmd">ssh -R 80:localhost:4748 nokey@localhost.run</code> (type <b>yes</b> the first time)</li>
@@ -116,7 +117,7 @@
       </div>
       <div>
         <h4>Cloudflare (no account, new address each run)</h4>
-        <p class="note">Some internet providers block these quick tunnels. If it says "failed to request quick Tunnel", use ngrok.</p>
+        <p class="note">Some internet providers block these quick tunnels. If it says "failed to request quick Tunnel", use localhost.run.</p>
         <ol class="steps">
           <li>Windows: <code class="cmd">winget install Cloudflare.cloudflared</code> · Linux: install the <a href="https://github.com/cloudflare/cloudflared/releases" target="_blank" rel="noopener">cloudflared package</a></li>
           <li>Run: <code class="cmd" id="cf-cmd"></code></li>
@@ -128,6 +129,7 @@
 
     <h3>Recent alerts</h3>
     <ul class="alerts" id="alerts"><li class="note">None yet.</li></ul>
+    <p class="note">Something not working? The <a href="https://pass-live.vercel.app/#help" target="_blank" rel="noopener">troubleshooting guide</a> covers every problem we hit while testing, and how to send a test alert without TradingView Premium.</p>
   </section>
   <footer>Pass Live is open source: <a href="https://github.com/AtomiqTraders/pass-live" target="_blank" rel="noopener">github.com/AtomiqTraders/pass-live</a>. Unofficial, not affiliated with MyFundedPerps. Trading is risky; you're responsible for orders your alerts send.</footer>
 </main>

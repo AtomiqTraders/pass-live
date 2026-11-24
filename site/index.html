@@ -16,7 +16,7 @@
 <body>
 <header class="nav">
   <a class="brand" href="./"><span class="mark">P/O</span> Pass Live</a>
-  <nav><a href="#demo">Demo</a><a href="#install">Install</a><a href="#tradingview">TradingView</a><a href="#faq">FAQ</a></nav>
+  <nav><a href="#demo">Demo</a><a href="#install">Install</a><a href="#tradingview">TradingView</a><a href="#help">Help</a><a href="#faq">FAQ</a></nav>
   <a class="btn small" href="https://github.com/AtomiqTraders/pass-live" rel="noopener">GitHub</a>
 </header>
 
@@ -99,9 +99,9 @@ cd pass-live
   <div class="cols">
     <ol>
       <li>Make a <b>Read And Trade</b> API key (try a <b>Sandbox</b> account first) and paste it into Pass Live.</li>
-      <li>Start a free tunnel so TradingView can reach your computer: <code>ssh -R 80:localhost:4748 nokey@localhost.run</code> (no sign-up), <code>ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748</code> or <code>cloudflared tunnel --url http://localhost:4748</code>. It works the same on Windows and Linux. If Cloudflare says "failed to request quick Tunnel", your internet provider blocks it: use ngrok.</li>
+      <li>Open a tunnel so TradingView can reach your computer (see below).</li>
       <li>In TradingView, make an alert, tick <b>Webhook URL</b>, paste <code>https://your-tunnel-address/tv</code>, and paste the alert message from the Setup page.</li>
-      <li>Watch it in <b>Dry run</b>. When it does what you expect, switch on real orders.</li>
+      <li>Watch it in <b>Dry run</b>. When it does what you expect, tick <b>Send real orders</b> and confirm.</li>
     </ol>
     <ul class="checks">
       <li>Starts in dry run: nothing is sent until you say so</li>
@@ -113,6 +113,61 @@ cd pass-live
     </ul>
   </div>
   <p class="note">TradingView webhooks need a paid TradingView plan. You're responsible for the orders your alerts send.</p>
+
+  <h3 class="sub-h">The tunnel we use: localhost.run</h3>
+  <p class="lede">No sign-up and nothing to install: Windows 10/11, Linux and macOS all have <code>ssh</code> built in. It's what we tested Pass Live with, and it worked on a network that blocks ngrok's sign-up and Cloudflare's quick tunnels.</p>
+  <div class="os">
+    <ol>
+      <li>Start Pass Live, then in a second terminal run:
+        <pre><code>ssh -R 80:localhost:4748 nokey@localhost.run</code></pre>
+        The first time, type <b>yes</b> when it asks about the host.</li>
+      <li>It prints an address like <code>https://63a6d153434ad2.app.lhr.life</code>. Your webhook URL is that address plus <code>/tv</code>.</li>
+      <li>Keep that terminal open. If you close it, or the free address rotates, put the new address into your TradingView alert.</li>
+    </ol>
+    <p class="note">Check it from any browser: <code>https://your-address/tv</code> should show a blank "not found" page. That answer comes from Pass Live, so the tunnel works.</p>
+  </div>
+  <details><summary>Other tunnels</summary>
+    <p><b>ngrok</b> (an address that never changes, needs a free account): <code>ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748</code></p>
+    <p><b>Cloudflare</b> (no account): <code>cloudflared tunnel --url http://localhost:4748</code>. Some internet providers block these quick tunnels.</p>
+  </details>
+</section>
+
+<section class="band" id="help">
+  <h2>Troubleshooting</h2>
+  <p class="lede">The problems we ran into while building and testing Pass Live, and what fixes them. Every alert shows its result under <b>Recent alerts</b> on the Setup page: start there.</p>
+
+  <h3 class="sub-h">Test without TradingView Premium</h3>
+  <p>Send the same message TradingView would send, from a terminal. Use the passphrase from the Setup page and a new <code>id</code> each time.</p>
+  <p class="note">Linux and macOS:</p>
+  <pre><code>curl -X POST http://localhost:4748/tv -H 'Content-Type: application/json' -d '{"passphrase":"PASSPHRASE","action":"buy","symbol":"BTCUSDT","usd":500,"id":"test-1"}'</code></pre>
+  <p class="note">Windows (Command Prompt):</p>
+  <pre><code>curl -X POST http://localhost:4748/tv -H "Content-Type: application/json" -d "{\"passphrase\":\"PASSPHRASE\",\"action\":\"buy\",\"symbol\":\"BTCUSDT\",\"usd\":500,\"id\":\"test-1\"}"</code></pre>
+  <p>Close it with <code>"action":"close"</code>, or every position with <code>"action":"close_all"</code>.</p>
+
+  <h3 class="sub-h">Tunnel</h3>
+  <details><summary>Cloudflare says "failed to request quick Tunnel"</summary><p>Your internet provider blocks Cloudflare's quick tunnels. Use localhost.run.</p></details>
+  <details><summary>ngrok's sign-up page won't open</summary><p>Some networks block it, on both phone and laptop. Use localhost.run: it needs no account.</p></details>
+  <details><summary>Windows says 'ssh' is not recognized</summary><p>Settings → System → Optional features → add <b>OpenSSH Client</b>, then open a new terminal.</p></details>
+  <details><summary>Alerts stopped arriving</summary><p>The tunnel terminal was closed, or the free localhost.run address changed. Start it again and paste the new address (plus <code>/tv</code>) into your alert.</p></details>
+
+  <h3 class="sub-h">Alerts</h3>
+  <details><summary>The reply says <code>"ok":true</code> but nothing traded</summary><p>That reply only means "received". Look at <code>"mode"</code> in the reply and at Recent alerts. "Dry run" means real orders are off: tick <b>Send real orders</b> on the Setup page and confirm in the box that appears.</p></details>
+  <details><summary><code>401 bad passphrase</code></summary><p>The passphrase in the alert doesn't match. If you pressed <b>New</b>, copy the alert message from the Setup page again.</p></details>
+  <details><summary>"Same alert already handled"</summary><p>An alert with the same <code>id</code> already ran, so it won't trade twice. Use <code>{{timenow}}</code> in TradingView, or a new id when testing.</p></details>
+  <details><summary>"No open BTC position to close"</summary><p>There's nothing open for that symbol on the account in <b>Trade on account</b>. Check the account, or whether the buy was only a dry run.</p></details>
+  <details><summary>"new trades are paused"</summary><p>A guard: the daily loss or max drawdown is past the share you chose, or the account isn't active. Closing still works. You can change the share on the Setup page.</p></details>
+  <details><summary>"Unknown symbol", "Give a size", "below the minimum", "over your max"</summary><p>Fix the alert message: use a MyFundedPerps market such as <code>BTCUSDT</code>, add <code>"usd"</code> or <code>"size"</code>, and keep the order between the market's minimum and your max order value.</p></details>
+  <details><summary>Any other error</summary><p>Recent alerts shows exactly what MyFundedPerps answered, including which field it refused. <a href="https://github.com/AtomiqTraders/pass-live/issues" rel="noopener">Open an issue</a> with that line. Never include your API key or passphrase.</p></details>
+
+  <h3 class="sub-h">App</h3>
+  <details><summary>"Pass Live needs Node.js 22 or newer"</summary><p>Install the LTS version from <a href="https://nodejs.org" rel="noopener">nodejs.org</a>, then start Pass Live again.</p></details>
+  <details><summary>"Port 4747 is busy"</summary><p>Pass Live is already running in another window. Use that one, or close it and start again.</p></details>
+  <details><summary>The key isn't accepted</summary><p>Check it's copied whole and still active on MyFundedPerps. The overlay works with a <b>Read Only</b> key; trading needs <b>Read And Trade</b>.</p></details>
+</section>
+
+<section class="band" id="next">
+  <h2>Coming next</h2>
+  <p class="lede">The TradingView alerts are a bridge. What we're working on is simpler: a MyFundedPerps order panel right inside TradingView, as a browser extension, so you can place and close trades from the chart without a tunnel, a webhook or a paid TradingView plan.</p>
 </section>
 
 <section class="band" id="faq">

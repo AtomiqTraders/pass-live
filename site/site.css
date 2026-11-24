@@ -36,7 +36,9 @@ select { font: 15px var(--sans); color: var(--ink); background: var(--card); bor
 .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
 .tabs button { font: 600 15px var(--sans); padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer; }
 .tabs button[aria-selected="true"] { background: var(--lime); color: #0e0f0c; border-color: var(--lime); }
-.os { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; }
+.os { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; margin-bottom: 12px; }
+.sub-h { font-size: 20px; margin: 36px 0 10px; }
+.band > p { max-width: 72ch; }
 .os ol, .cols ol { margin: 0; padding-left: 22px; } .os li, .cols li { margin: 10px 0; }
 .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
 @media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }

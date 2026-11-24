@@ -66,10 +66,17 @@ URL options: `layout=card|bar`, `corner=left|right`, `pos=bottom|top`, `theme=da
 TradingView webhooks need a **paid TradingView plan**.
 
 1. **Choose your guards** on the Setup page: the account, max order value ($), max leverage, the point at which new trades pause (e.g. 80% of the daily loss limit used), and optionally the only symbols allowed.
-2. **Start a tunnel** so TradingView can reach your computer. Alerts come in on port **4748**:
-   - **localhost.run** (no sign-up, nothing to install, works on networks that block the others):
-     `ssh -R 80:localhost:4748 nokey@localhost.run`
-     Webhook URL: the `https://….lhr.life` address it prints, plus `/tv`. The address changes now and then; update your alert when it does.
+2. **Start a tunnel** so TradingView can reach your computer. Alerts come in on port **4748**.
+
+   **The one we use: localhost.run.** No sign-up and nothing to install (`ssh` is built into Windows 10/11, Linux and macOS). We tested Pass Live with it on a network that blocks ngrok's sign-up and Cloudflare's quick tunnels. In a second terminal:
+
+   ```bash
+   ssh -R 80:localhost:4748 nokey@localhost.run
+   ```
+
+   Type `yes` the first time. It prints an address like `https://63a6d153434ad2.app.lhr.life`; your webhook URL is that plus `/tv`. Keep the terminal open. The free address changes now and then: put the new one into your alert when it does. To check it, open `https://your-address/tv` in a browser: a blank "not found" page comes from Pass Live, so the tunnel works.
+
+   Other tunnels:
    - **ngrok** (same address every time): sign up free, claim your static domain, then
      `ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748`
      Webhook URL: `https://YOUR-DOMAIN.ngrok-free.app/tv`
@@ -77,9 +84,11 @@ TradingView webhooks need a **paid TradingView plan**.
      Windows `winget install Cloudflare.cloudflared` · Linux: the [cloudflared package](https://github.com/cloudflare/cloudflared/releases), then
      `cloudflared tunnel --url http://localhost:4748`
      Webhook URL: the `https://….trycloudflare.com` address it prints, plus `/tv`
-     Some internet providers block quick tunnels ("failed to request quick Tunnel"); use ngrok then.
+     Some internet providers block quick tunnels ("failed to request quick Tunnel"); use localhost.run then.
 3. **Make the alert** in TradingView: Notifications → tick **Webhook URL** → paste the URL → paste the alert message from the Setup page into **Message**.
-4. **Watch it in Dry run** first. Every alert shows on the Setup page (and as a toast on the overlay) with what it *would* have ordered. When it does what you expect, tick **Send real orders**.
+4. **Watch it in Dry run** first. Every alert shows on the Setup page (and as a toast on the overlay) with what it *would* have ordered. When it does what you expect, tick **Send real orders** and confirm in the box that appears.
+
+No TradingView Premium? You can send the same message yourself; see [Troubleshooting](#troubleshooting).
 
 #### Alert message format
 
@@ -114,6 +123,50 @@ For a Pine strategy, use the **Pine strategy** template: it sends `{{strategy.or
 - At most 6 alerts a minute.
 
 Don't show the Setup page on stream: anyone with your passphrase and tunnel address could send alerts. Use **New** to change the passphrase.
+
+## Troubleshooting
+
+Every alert shows its result under **Recent alerts** on the Setup page. Start there.
+
+### Test without TradingView Premium
+
+Send the message TradingView would send, from a terminal. Use your passphrase from the Setup page and a new `id` each time.
+
+Linux and macOS:
+
+```bash
+curl -X POST http://localhost:4748/tv -H 'Content-Type: application/json' -d '{"passphrase":"PASSPHRASE","action":"buy","symbol":"BTCUSDT","usd":500,"id":"test-1"}'
+```
+
+Windows (Command Prompt):
+
+```bat
+curl -X POST http://localhost:4748/tv -H "Content-Type: application/json" -d "{\"passphrase\":\"PASSPHRASE\",\"action\":\"buy\",\"symbol\":\"BTCUSDT\",\"usd\":500,\"id\":\"test-1\"}"
+```
+
+Close it with `"action":"close"`, or every position with `"action":"close_all"`.
+
+### Common problems
+
+| What you see | What to do |
+|---|---|
+| Cloudflare: "failed to request quick Tunnel" | Your provider blocks quick tunnels. Use localhost.run. |
+| ngrok's sign-up page won't open | Some networks block it. Use localhost.run (no account). |
+| Windows: `'ssh' is not recognized` | Settings → System → Optional features → add **OpenSSH Client**, open a new terminal. |
+| Alerts stopped arriving | The tunnel terminal closed or the free address changed. Restart it and update the alert's webhook URL. |
+| Reply is `"ok":true` but nothing traded | That only means "received". Check `"mode"` in the reply and Recent alerts. In dry run, tick **Send real orders** and confirm. |
+| `401 bad passphrase` | The alert's passphrase is old. Copy the message from the Setup page again. |
+| "Same alert already handled" | That `id` already ran. Use `{{timenow}}` in TradingView or a new id when testing. |
+| "No open BTC position to close" | Nothing open for that symbol on the **Trade on account** account, or the buy was a dry run. |
+| "new trades are paused" | A guard: a loss limit is past your chosen share, or the account isn't active. Closing still works. |
+| "Unknown symbol", "Give a size", "below the minimum", "over your max" | Fix the alert: a market like `BTCUSDT`, add `usd` or `size`, stay between the minimum and your max order value. |
+| "Pass Live needs Node.js 22 or newer" | Install the LTS from [nodejs.org](https://nodejs.org). |
+| "Port 4747 is busy" | Pass Live is already running in another window. |
+| Any other error | Recent alerts shows exactly what MyFundedPerps answered, including the refused field. [Open an issue](https://github.com/AtomiqTraders/pass-live/issues) with that line. Never include your key or passphrase. |
+
+## Coming next
+
+The TradingView alerts are a bridge. What we're working on is simpler: a **MyFundedPerps order panel right inside TradingView**, as a browser extension, so you can place and close trades from the chart without a tunnel, a webhook or a paid TradingView plan.
 
 ## How it works
 
