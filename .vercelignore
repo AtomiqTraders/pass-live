@@ -1,0 +1,8 @@
+# The website is static: Vercel only needs site/, public/ (the overlay demo) and the build script.
+server.js
+lib/
+tests/
+start.bat
+start.sh
+.env
+.env.example
