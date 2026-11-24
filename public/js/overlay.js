@@ -102,13 +102,15 @@ if (q.has('demo')) {
   // runs entirely in the page, so the hosted demo works with no install
   // ?from=<sec> starts partway through the demo day, ?speed=<x> plays it faster, ?t0=<epoch ms> pins the clock
   const t0 = +q.get('t0') || Date.now(), from = +q.get('from') || 0, speed = Math.min(10, Math.max(0.1, +q.get('speed') || 1));
-  const seen = {}, seenFills = new Set(); let hist = [], lastLoop = -1;
+  const seen = {}, seenFills = new Set(); let hist = [], lastLoop = -1, first = true;
   setInterval(() => {
     const sec = from + Math.max(0, (Date.now() - t0) / 1000) * speed, d = demoState(sec), loop = Math.floor(sec / d.loop);
     if (loop !== lastLoop) { lastLoop = loop; hist = []; seenFills.clear(); for (const k in seen) delete seen[k]; }
     const m = meters(d.account); hist.push([Date.now(), m.equity]);
     const fills = d.fills.map((f) => fillOf({ ...f, time: Date.now() }));
-    for (const f of fills) if (!seenFills.has(f.id)) { seenFills.add(f.id); toast(f); }
+    // trades from before the page opened count, but don't pop up
+    for (const f of fills) if (!seenFills.has(f.id)) { seenFills.add(f.id); if (!first) toast(f); }
+    first = false;
     for (const a of alertsFor(m, seen, nyDay())) showAlert(a);
     render({ mode: 'demo', stream: { connected: true }, account: { name: d.account.display_name }, m, history: hist, today: { trades: fills.length, wins: fills.filter((f) => f.pnl > 0).length, losses: fills.filter((f) => f.pnl < 0).length, realized: fills.reduce((a, f) => a + f.pnl - f.fee, 0) } });
   }, 100);
