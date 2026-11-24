@@ -4,7 +4,7 @@
   "description": "OBS overlay for MyFundedPerps traders: live equity, limits and fills on stream.",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=22" },
   "scripts": {
     "start": "node server.js",
     "demo": "node server.js --demo",

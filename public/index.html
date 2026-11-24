@@ -10,39 +10,117 @@
 <link rel="stylesheet" href="css/control.css">
 </head>
 <body>
-<header class="nav"><span class="mark">P/O</span> Pass Live <span class="tag">OBS overlay for MyFundedPerps</span><span class="status" id="status">connecting…</span></header>
+<header class="nav">
+  <span class="mark">P/O</span> Pass Live <span class="tag">for MyFundedPerps</span>
+  <nav class="steps-nav" aria-label="Sections"><a href="#connect">1 Connect</a><a href="#overlay">2 Overlay</a><a href="#tv">3 TradingView</a></nav>
+  <span class="status" id="status">starting…</span>
+</header>
 <main>
   <section class="intro">
     <h1>Your challenge, <em>live on stream.</em></h1>
-    <p>Equity against the target and the limits, every fill as it happens, and a warning before you blow the account. Add it to OBS as a Browser Source.</p>
+    <p>Three steps: connect your account, add the overlay to OBS, and (if you want) let TradingView alerts place your trades. Everything runs on this computer.</p>
   </section>
-  <div class="grid">
-    <form class="card" id="opts" autocomplete="off">
-      <h2>1 · Pick the look</h2>
-      <label>Account <select id="account"></select></label>
-      <label>Layout <select id="layout"><option value="card">Card (corner)</option><option value="bar">Bar (top strip)</option></select></label>
-      <div class="row">
-        <label>Corner <select id="corner"><option value="left">Left</option><option value="right">Right</option></select></label>
-        <label>Position <select id="pos"><option value="bottom">Bottom</option><option value="top">Top</option></select></label>
-      </div>
-      <div class="row">
-        <label>Theme <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
-        <label>Size <select id="scale"><option value="0.8">Small</option><option value="1" selected>Normal</option><option value="1.3">Large</option></select></label>
-      </div>
-      <h2>2 · Add it to OBS</h2>
-      <ol class="steps">
-        <li>Sources → <b>+</b> → <b>Browser</b></li>
-        <li>Paste this URL, set width <b>1920</b> and height <b>1080</b></li>
-      </ol>
-      <div class="url"><code id="url"></code><button type="button" id="copy">Copy</button></div>
-      <p class="note" id="copied" aria-live="polite"></p>
+
+  <section class="card" id="connect">
+    <h2><span class="n">1</span> Connect your MyFundedPerps account</h2>
+    <p class="note" id="key-state"></p>
+    <ol class="steps">
+      <li>Open <a href="https://myfundedperpetuals.com/settings?section=api-keys" target="_blank" rel="noopener">your API keys</a> on MyFundedPerps. Pick <b>Test (Sandbox)</b> to practise first.</li>
+      <li>Create a key: <b>Read Only</b> is enough for the overlay. <b>Read And Trade</b> is needed for TradingView trading.</li>
+      <li>Paste it here. It's saved in the <code>.env</code> file on this computer only.</li>
+    </ol>
+    <form id="key-form" class="inline-form" autocomplete="off">
+      <input id="key" type="password" placeholder="fp_test_… or fp_live_…" spellcheck="false" aria-label="API key">
+      <button type="submit">Save and connect</button>
     </form>
-    <section class="card preview">
-      <h2>Preview</h2>
+    <p class="msg" id="key-msg" aria-live="polite"></p>
+  </section>
+
+  <section class="card" id="overlay">
+    <h2><span class="n">2</span> Add the overlay to OBS</h2>
+    <div class="grid">
+      <form id="opts" autocomplete="off">
+        <label>Account <select id="account"></select></label>
+        <div class="row">
+          <label>Layout <select id="layout"><option value="card">Card (corner)</option><option value="bar">Bar (top strip)</option></select></label>
+          <label>Theme <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+        </div>
+        <div class="row">
+          <label>Corner <select id="corner"><option value="left">Left</option><option value="right">Right</option></select></label>
+          <label>Position <select id="pos"><option value="bottom">Bottom</option><option value="top">Top</option></select></label>
+        </div>
+        <label>Size <select id="scale"><option value="0.8">Small</option><option value="1" selected>Normal</option><option value="1.3">Large</option></select></label>
+        <ol class="steps">
+          <li>In OBS: Sources → <b>+</b> → <b>Browser</b></li>
+          <li>Paste this URL. Width <b>1920</b>, height <b>1080</b>.</li>
+        </ol>
+        <div class="copy"><code id="url"></code><button type="button" data-copy="url">Copy</button></div>
+      </form>
       <div class="screen"><iframe id="frame" title="Overlay preview" src="about:blank"></iframe></div>
-      <p class="note">Your API key stays in this app on your computer. The overlay only receives numbers.</p>
-    </section>
-  </div>
+    </div>
+  </section>
+
+  <section class="card" id="tv">
+    <h2><span class="n">3</span> Trade from TradingView <span class="pill" id="tv-mode">Dry run</span></h2>
+    <p class="note">Your TradingView alerts place orders on your account. While <b>Dry run</b> is on, nothing is sent: you see what <i>would</i> be ordered. TradingView webhooks need a paid TradingView plan.</p>
+
+    <div class="grid">
+      <form id="tv-form" autocomplete="off">
+        <label class="switch"><input type="checkbox" id="tv-enabled"> <span>Send real orders (off = dry run)</span></label>
+        <label>Trade on account <select id="tv-account"></select></label>
+        <div class="row">
+          <label>Max order value ($) <input id="tv-max" type="number" min="10" step="10"></label>
+          <label>Max leverage <input id="tv-lev" type="number" min="1" step="1"></label>
+        </div>
+        <label>Pause new trades when a limit is <select id="tv-block"><option value="0.5">50% used</option><option value="0.7">70% used</option><option value="0.8">80% used</option><option value="0.9">90% used</option></select></label>
+        <label>Only these symbols (optional) <input id="tv-allowed" placeholder="BTC, ETH" spellcheck="false"></label>
+        <button type="submit">Save</button>
+        <p class="msg" id="tv-msg" aria-live="polite"></p>
+        <p class="note">Closing a position is never blocked, so you can always get out.</p>
+      </form>
+      <div>
+        <h3>A · Your passphrase</h3>
+        <p class="note">⚠ Don't show this page on stream: anyone with the passphrase and your tunnel address could send alerts.</p>
+        <div class="copy"><code id="secret"></code><button type="button" data-copy="secret">Copy</button><button type="button" class="ghost" id="new-secret">New</button></div>
+        <h3>B · Alert message (paste into TradingView)</h3>
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-tpl="buy" aria-selected="true">Buy</button>
+          <button type="button" role="tab" data-tpl="sell">Sell</button>
+          <button type="button" role="tab" data-tpl="close">Close</button>
+          <button type="button" role="tab" data-tpl="strategy">Pine strategy</button>
+        </div>
+        <div class="copy tall"><code id="tpl"></code><button type="button" data-copy="tpl">Copy</button></div>
+        <p class="note" id="tpl-note"></p>
+        <button type="button" class="ghost" id="test-alert">Send this as a test (never trades)</button>
+      </div>
+    </div>
+
+    <h3>C · Let TradingView reach this computer</h3>
+    <p class="note">TradingView sends alerts over the internet, so it needs a public web address that forwards to Pass Live (port <b id="hook-port">4748</b>). A free tunnel does that. Use one:</p>
+    <div class="os">
+      <div>
+        <h4>ngrok (same address every time)</h4>
+        <ol class="steps">
+          <li>Sign up free at <a href="https://ngrok.com" target="_blank" rel="noopener">ngrok.com</a>, install it, and claim your free static domain.</li>
+          <li>Run: <code class="cmd" id="ngrok-cmd"></code></li>
+          <li>Webhook URL in TradingView: <code>https://YOUR-DOMAIN.ngrok-free.app/tv</code></li>
+        </ol>
+      </div>
+      <div>
+        <h4>Cloudflare (no account, new address each run)</h4>
+        <ol class="steps">
+          <li>Windows: <code class="cmd">winget install Cloudflare.cloudflared</code> · Linux: install the <a href="https://github.com/cloudflare/cloudflared/releases" target="_blank" rel="noopener">cloudflared package</a></li>
+          <li>Run: <code class="cmd" id="cf-cmd"></code></li>
+          <li>Webhook URL: the <code>https://….trycloudflare.com</code> address it prints, plus <code>/tv</code></li>
+        </ol>
+      </div>
+    </div>
+    <p class="note">In TradingView: create an alert → <b>Notifications</b> → tick <b>Webhook URL</b> → paste the URL → put the alert message from step B in <b>Message</b>.</p>
+
+    <h3>Recent alerts</h3>
+    <ul class="alerts" id="alerts"><li class="note">None yet.</li></ul>
+  </section>
+  <footer>Pass Live is open source: <a href="https://github.com/AtomiqTraders/pass-live" target="_blank" rel="noopener">github.com/AtomiqTraders/pass-live</a>. Unofficial, not affiliated with MyFundedPerps. Trading is risky; you're responsible for orders your alerts send.</footer>
 </main>
 <script type="module" src="js/control.js"></script>
 </body>

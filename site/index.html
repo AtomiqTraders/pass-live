@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass Live: your MyFundedPerps challenge, live on stream</title>
+<meta name="description" content="Free OBS overlay for MyFundedPerps traders: live equity against your target and limits, every fill, warnings before you blow the account, and TradingView alerts that place your trades. Runs on your own computer.">
+<meta property="og:title" content="Pass Live: your challenge, live on stream">
+<meta property="og:description" content="Free OBS overlay + TradingView bridge for MyFundedPerps. Your key never leaves your computer.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23c6f432'/%3E%3Ctext x='32' y='44' text-anchor='middle' fill='%230e0f0c' font-family='Georgia' font-style='italic' font-size='30'%3EP/O%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="./"><span class="mark">P/O</span> Pass Live</a>
+  <nav><a href="#demo">Demo</a><a href="#install">Install</a><a href="#tradingview">TradingView</a><a href="#faq">FAQ</a></nav>
+  <a class="btn small" href="https://github.com/AtomiqTraders/pass-live" rel="noopener">GitHub</a>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">Free · open source · for MyFundedPerps traders</p>
+  <h1>Your challenge, <em>live on stream.</em></h1>
+  <p class="sub">An OBS overlay that shows your equity against the target and the limits, pops up every fill, and warns you before you blow the account. Plus TradingView alerts that place your trades. It runs on your own computer, so your API key never leaves it.</p>
+  <div class="cta">
+    <a class="btn" href="#install">Install it free</a>
+    <a class="btn ghost" href="https://github.com/AtomiqTraders/pass-live" rel="noopener">View the code on GitHub</a>
+  </div>
+  <video class="video" src="media/pass-live-demo.mp4" controls playsinline preload="metadata"></video>
+</section>
+
+<section class="band" id="demo">
+  <h2>Try the overlay right here</h2>
+  <p class="lede">This is the real overlay running its demo account. Change the look the same way you will in the app.</p>
+  <div class="demo-controls">
+    <label>Layout <select id="d-layout"><option value="card">Card</option><option value="bar">Bar</option></select></label>
+    <label>Theme <select id="d-theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+    <label>Corner <select id="d-corner"><option value="left">Left</option><option value="right">Right</option></select></label>
+  </div>
+  <div class="screen"><iframe id="d-frame" title="Pass Live overlay demo" src="overlay/overlay.html?demo&from=20"></iframe></div>
+</section>
+
+<section class="features">
+  <div><h3>Target and limits, live</h3><p>Equity line against your profit target, daily loss limit and max drawdown, read from your account's own rules.</p></div>
+  <div><h3>Every fill on screen</h3><p>Buys and sells pop up the moment they fill, with size, price and P&amp;L. A running tally for the day.</p></div>
+  <div><h3>Warns you first</h3><p>At 50%, 75% and 90% of a limit the panel turns amber, then red. Viewers see it; so do you.</p></div>
+  <div><h3>TradingView trading</h3><p>Your alerts place orders on your account, with a max order size and a pause when a limit is nearly used.</p></div>
+</section>
+
+<section class="band" id="install">
+  <h2>Install</h2>
+  <p class="lede">It's a small app that runs on your computer. You need <a href="https://nodejs.org" rel="noopener">Node.js</a> 22 or newer (free). About five minutes.</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-os="win" aria-selected="true">Windows</button>
+    <button role="tab" data-os="linux" aria-selected="false">Linux</button>
+    <button role="tab" data-os="mac" aria-selected="false">macOS</button>
+  </div>
+  <div class="os" data-panel="win">
+    <ol>
+      <li><b>Install Node.js:</b> download the <b>LTS</b> installer from <a href="https://nodejs.org" rel="noopener">nodejs.org</a> and click through it.</li>
+      <li><b>Download Pass Live:</b> <a class="btn small" href="https://github.com/AtomiqTraders/pass-live/archive/refs/heads/main.zip">Download ZIP</a> then right-click the file → <b>Extract All</b>.</li>
+      <li><b>Start it:</b> open the extracted folder and double-click <code>start.bat</code>. A window opens and your browser goes to <code>http://localhost:4747</code>.</li>
+      <li><b>Connect:</b> on that page, paste your MyFundedPerps API key (step 1), then copy the OBS URL (step 2).</li>
+      <li><b>OBS:</b> Sources → <b>+</b> → <b>Browser</b> → paste the URL → width 1920, height 1080.</li>
+    </ol>
+    <p class="note">Keep the Pass Live window open while you stream. Close it to stop.</p>
+  </div>
+  <div class="os" data-panel="linux" hidden>
+    <ol>
+      <li><b>Install Node.js 22+:</b> with your package manager or <a href="https://nodejs.org/en/download" rel="noopener">nodejs.org</a>. Check with <code>node -v</code>.</li>
+      <li><b>Get Pass Live and start it:</b>
+        <pre><code>git clone https://github.com/AtomiqTraders/pass-live
+cd pass-live
+./start.sh</code></pre>
+        No git? <a href="https://github.com/AtomiqTraders/pass-live/archive/refs/heads/main.zip">Download the ZIP</a>, unzip it and run <code>./start.sh</code> inside.</li>
+      <li><b>Connect:</b> your browser opens <code>http://localhost:4747</code>. Paste your API key, then copy the OBS URL.</li>
+      <li><b>OBS:</b> Sources → <b>+</b> → <b>Browser</b> → paste the URL → 1920 × 1080.</li>
+    </ol>
+    <p class="note">Stop it with <code>Ctrl+C</code>. Update later with <code>git pull</code>.</p>
+  </div>
+  <div class="os" data-panel="mac" hidden>
+    <ol>
+      <li><b>Install Node.js:</b> the LTS installer from <a href="https://nodejs.org" rel="noopener">nodejs.org</a>, or <code>brew install node</code>.</li>
+      <li><b>Get Pass Live and start it:</b>
+        <pre><code>git clone https://github.com/AtomiqTraders/pass-live
+cd pass-live
+./start.sh</code></pre></li>
+      <li><b>Connect and add to OBS</b> exactly as on Windows and Linux.</li>
+    </ol>
+  </div>
+  <p class="note">No key yet? It starts with a demo account so you can set up your scene first.</p>
+</section>
+
+<section class="band" id="tradingview">
+  <h2>Trade from TradingView</h2>
+  <p class="lede">Turn your TradingView alerts into orders on your MyFundedPerps account. The Setup page gives you everything to copy.</p>
+  <div class="cols">
+    <ol>
+      <li>Make a <b>Read And Trade</b> API key (try a <b>Sandbox</b> account first) and paste it into Pass Live.</li>
+      <li>Start a free tunnel so TradingView can reach your computer: <code>ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748</code> or <code>cloudflared tunnel --url http://localhost:4748</code>. It works the same on Windows and Linux.</li>
+      <li>In TradingView, make an alert, tick <b>Webhook URL</b>, paste <code>https://your-tunnel-address/tv</code>, and paste the alert message from the Setup page.</li>
+      <li>Watch it in <b>Dry run</b>. When it does what you expect, switch on real orders.</li>
+    </ol>
+    <ul class="checks">
+      <li>Starts in dry run: nothing is sent until you say so</li>
+      <li>Secret passphrase on every alert</li>
+      <li>Max order value and max leverage</li>
+      <li>Pauses new trades when a limit is nearly used</li>
+      <li>Duplicate alerts never trade twice</li>
+      <li>Closing a position is never blocked</li>
+    </ul>
+  </div>
+  <p class="note">TradingView webhooks need a paid TradingView plan. You're responsible for the orders your alerts send.</p>
+</section>
+
+<section class="band" id="faq">
+  <h2>Questions</h2>
+  <details><summary>Is my API key safe?</summary><p>It's saved in a file on your computer and only ever sent to MyFundedPerps. OBS and your stream only get numbers. The app only answers to <code>localhost</code>, so websites can't reach it. The TradingView port accepts nothing without your passphrase.</p></details>
+  <details><summary>Does it work with live accounts?</summary><p>Yes. Sandbox keys start with <code>fp_test_</code>, live keys with <code>fp_live_</code>; Pass Live picks the right servers automatically.</p></details>
+  <details><summary>Is it official?</summary><p>No. It's an independent open-source tool built on the public MyFundedPerps API. It isn't made by or affiliated with MyFundedPerps.</p></details>
+  <details><summary>What does it cost?</summary><p>Nothing. It's MIT licensed. TradingView webhooks need a paid TradingView plan; the overlay doesn't.</p></details>
+</section>
+
+<footer>
+  <p><a href="https://github.com/AtomiqTraders/pass-live" rel="noopener">github.com/AtomiqTraders/pass-live</a> · MIT license</p>
+  <p class="note">Unofficial; not affiliated with MyFundedPerps. Not financial advice. Trading is risky.</p>
+</footer>
+<script src="site.js"></script>
+</body>
+</html>

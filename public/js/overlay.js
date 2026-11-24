@@ -83,6 +83,14 @@ function toast(f) {
   $('toasts').prepend(el); while ($('toasts').children.length > 3) $('toasts').lastChild.remove();
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 4500);
 }
+// TradingView alerts: what was sent, blocked or (in dry run) would have been sent
+function tvToast(t) {
+  if (!t || !t.text) return; const el = document.createElement('div'); el.className = `toast tv ${t.status}`;
+  const label = { sent: 'TV ✓', dry: 'TV · DRY', blocked: 'TV · PAUSED', error: 'TV · ERROR' }[t.status] || 'TV';
+  el.innerHTML = `<span class="side tv">${esc(label)}</span><span>${esc(t.text.replace(/^(Sent|Dry run): /, ''))}</span>`;
+  $('toasts').prepend(el); while ($('toasts').children.length > 3) $('toasts').lastChild.remove();
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, t.status === 'blocked' ? 7000 : 5000);
+}
 let alertTimer = 0;
 function showAlert(a) {
   const el = $('alert'); el.textContent = a.text; el.className = `alert l${a.level}`; el.hidden = false;
@@ -119,5 +127,6 @@ if (q.has('demo')) {
   src.addEventListener('state', (e) => render(JSON.parse(e.data)));
   src.addEventListener('fill', (e) => toast(JSON.parse(e.data)));
   src.addEventListener('alert', (e) => showAlert(JSON.parse(e.data)));
+  src.addEventListener('tv', (e) => tvToast(JSON.parse(e.data)));
   src.onerror = () => { if (last) render({ ...last, stream: { connected: false } }); };
 }
