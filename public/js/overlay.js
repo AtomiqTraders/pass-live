@@ -41,7 +41,7 @@ function render(s) {
   const worst = Math.max(m.dailyUsed || 0, m.ddUsed || 0), p = $('panel');
   p.classList.toggle('warn75', worst >= 0.75 && worst < 0.9); p.classList.toggle('warn90', worst >= 0.9);
   const t = s.today || {};
-  $('today').innerHTML = `<span>Today <b>${t.trades || 0}</b> trades</span><span><b>${t.wins || 0}</b>W <b>${t.losses || 0}</b>L</span><span class="${t.realized > 0 ? 'up' : t.realized < 0 ? 'down' : ''}">${money(t.realized || 0, true)} realized</span><span>${m.status === 'active' ? '' : m.status.toUpperCase()}</span>`;
+  $('today').innerHTML = `<span>Today <b>${t.trades || 0}</b> trades</span><span><b>${t.wins || 0}</b>W <b>${t.losses || 0}</b>L</span><span class="${t.realized > 0 ? 'up' : t.realized < 0 ? 'down' : ''}">${money(t.realized || 0, true)} realized</span><span>${m.status === 'active' ? '' : esc(m.status.toUpperCase() + (s.account?.failedRule ? ': ' + s.account.failedRule.replace(/-/g, ' ') : ''))}</span>`;
   drawSpark(s.history || [], m);
   root.style.setProperty('--panel-h', $('panel').offsetHeight + 'px');
 }

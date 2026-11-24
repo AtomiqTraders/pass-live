@@ -30,7 +30,7 @@ let accounts = [], streamState = { connected: false, error: null };
 function publicState(id) {
   const s = acc(id), today = nyDay(), tf = s.fills.filter((f) => nyDay(f.time) === today);
   return {
-    mode: MODE, stream: streamState, account: s.acct ? { id: s.acct.id, number: s.acct.account_number, name: s.acct.display_name || s.acct.name, status: s.acct.status, stage: s.acct.stage } : null,
+    mode: MODE, stream: streamState, account: s.acct ? { id: s.acct.id, number: s.acct.account_number, name: s.acct.display_name || s.acct.name, status: s.acct.status, stage: s.acct.stage, failedRule: s.acct.failed_rule_id || null } : null,
     m: s.m, history: s.history.slice(-400),
     today: { trades: tf.length, wins: tf.filter((f) => f.pnl > 0).length, losses: tf.filter((f) => f.pnl < 0).length, realized: tf.reduce((a, f) => a + (f.pnl || 0) - (f.fee || 0), 0) },
   };
@@ -80,8 +80,17 @@ async function pollLoop() {
 async function backfillFills(id) {
   try {
     const page = await api(`/fills?account_id=${encodeURIComponent(id)}&limit=100`);
-    const list = Array.isArray(page) ? page : page?.data || [];
-    list.slice().reverse().forEach((f) => onFill(id, f, { quiet: true }));
+    const list = (Array.isArray(page) ? page : page?.data || []).slice().reverse(); // oldest first
+    list.forEach((f) => onFill(id, f, { quiet: true }));
+    // rebuild today's equity line from the fills: walk back from the current balance
+    const st = acc(id), today = nyDay(), todays = st.fills.filter((f) => nyDay(f.time) === today);
+    if (st.acct && todays.length) {
+      let bal = +st.acct.balance; const pts = [];
+      for (let i = todays.length - 1; i >= 0; i--) { pts.push([todays[i].time, bal]); bal -= (todays[i].pnl || 0) - (todays[i].fee || 0); }
+      pts.push([todays[0].time - 60000, bal]);
+      st.history = pts.reverse().concat(st.history.filter((p) => p[0] > todays[todays.length - 1].time));
+      pushState(id);
+    }
   } catch (e) { log('fills backfill skipped:', e.message); }
 }
 
@@ -137,6 +146,7 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname === '/events') {
     const id = url.searchParams.get('account') || defaultAccount(); if (!id) { res.writeHead(503).end('no account yet'); return; }
+    if (DEMO ? id !== 'demo' : !accounts.some((a) => a.id === id)) { res.writeHead(404).end('unknown account'); return; }
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive', ...SEC });
     const s = acc(id); s.subs.add(res); res.write(`event: state\ndata: ${JSON.stringify(publicState(id))}\n\n`);
     if (!DEMO && s.subs.size === 1 && !s.backfilled) { s.backfilled = true; backfillFills(id); }
