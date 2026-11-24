@@ -70,6 +70,8 @@ $('key-form').addEventListener('submit', async (e) => {
   try { S = await post('/api/key', { key: k }); $('key').value = ''; $('key-msg').textContent = `Connected (${S.mode}). ${S.accounts.length} account(s) found.`; $('key-msg').className = 'msg ok'; loadedForm = false; render(); }
   catch (err) { $('key-msg').textContent = err.message; $('key-msg').className = 'msg bad'; }
 });
+// the real-orders switch saves straight away, so it can't be left half-changed
+$('tv-enabled').addEventListener('change', () => $('tv-form').requestSubmit());
 $('tv-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const enabled = $('tv-enabled').checked;

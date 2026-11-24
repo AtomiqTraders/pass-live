@@ -216,7 +216,8 @@ const hook = http.createServer((req, res) => {
     const raw = Buffer.concat(chunks).toString('utf8');
     if (!sameSecret(passOf(raw), bridge().secret)) { res.writeHead(401).end('bad passphrase'); log(`rejected alert (wrong passphrase) from ${ip}`); return; }
     // answer TradingView straight away (it gives up after a few seconds), then do the work
-    res.writeHead(202, { 'Content-Type': 'application/json' }).end('{"ok":true}');
+    const real = bridge().enabled;
+    res.writeHead(202, { 'Content-Type': 'application/json' }).end(JSON.stringify({ ok: true, received: true, mode: real ? 'real orders' : 'dry run (nothing is sent)', result: 'see Recent alerts on the Setup page' }));
     handleAlert(raw, ip).catch((e) => recordAlert({ status: 'error', text: e.message }));
   });
 });
