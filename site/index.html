@@ -99,7 +99,7 @@ cd pass-live
   <div class="cols">
     <ol>
       <li>Make a <b>Read And Trade</b> API key (try a <b>Sandbox</b> account first) and paste it into Pass Live.</li>
-      <li>Start a free tunnel so TradingView can reach your computer: <code>ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748</code> or <code>cloudflared tunnel --url http://localhost:4748</code>. It works the same on Windows and Linux.</li>
+      <li>Start a free tunnel so TradingView can reach your computer: <code>ngrok http --url=YOUR-DOMAIN.ngrok-free.app 4748</code> or <code>cloudflared tunnel --url http://localhost:4748</code>. It works the same on Windows and Linux. If Cloudflare says "failed to request quick Tunnel", your internet provider blocks it: use ngrok.</li>
       <li>In TradingView, make an alert, tick <b>Webhook URL</b>, paste <code>https://your-tunnel-address/tv</code>, and paste the alert message from the Setup page.</li>
       <li>Watch it in <b>Dry run</b>. When it does what you expect, switch on real orders.</li>
     </ol>

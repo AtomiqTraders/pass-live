@@ -74,6 +74,7 @@ TradingView webhooks need a **paid TradingView plan**.
      Windows `winget install Cloudflare.cloudflared` · Linux: the [cloudflared package](https://github.com/cloudflare/cloudflared/releases), then
      `cloudflared tunnel --url http://localhost:4748`
      Webhook URL: the `https://….trycloudflare.com` address it prints, plus `/tv`
+     Some internet providers block quick tunnels ("failed to request quick Tunnel"); use ngrok then.
 3. **Make the alert** in TradingView: Notifications → tick **Webhook URL** → paste the URL → paste the alert message from the Setup page into **Message**.
 4. **Watch it in Dry run** first. Every alert shows on the Setup page (and as a toast on the overlay) with what it *would* have ordered. When it does what you expect, tick **Send real orders**.
 
