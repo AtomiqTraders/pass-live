@@ -92,7 +92,11 @@ async function call(method, path, body, headers = {}) {
     } catch (e) { const err = new Error(`network: ${e.message}`); err.retry = true; throw err; }
     if ((res.status === 429 || res.status === 503) && method === 'GET') { await new Promise((r) => setTimeout(r, Math.min(30, +(res.headers.get('retry-after') || 2)) * 1000)); continue; }
     const json = await res.json().catch(() => ({}));
-    if (!res.ok && res.status !== 202) { const err = new Error(`${json?.error?.code || res.status}: ${json?.error?.message || 'request failed'}`); err.retry = res.status === 429 || res.status >= 500; err.status = res.status; throw err; }
+    if (!res.ok && res.status !== 202) {
+      // keep the API's extra error fields (which field was wrong, why) so the alert list can say it
+      const { code, message, ...more } = json?.error || {};
+      const extra = Object.keys(more).length ? ` (${JSON.stringify(more).slice(0, 300)})` : '';
+      const err = new Error(`${code || res.status}: ${message || 'request failed'}${extra}`); err.retry = res.status === 429 || res.status >= 500; err.status = res.status; throw err; }
     return { status: res.status, data: json.data, retryAfter: res.headers.get('retry-after') };
   }
   throw new Error('rate limited');

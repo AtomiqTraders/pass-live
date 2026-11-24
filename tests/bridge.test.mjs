@@ -78,7 +78,12 @@ before(async () => {
       if (p === '/fills') return send(res, 200, []);
       if (p === '/positions') return send(res, 200, [{ id: 'pos1', account_id: 'acc1', market_id: 'binance|BTCUSDT', side: 'long', size: 0.01, entry_price: 97000 }]);
       if (req.method === 'POST' && p === '/orders') return send(res, 201, { id: 'o1', status: 'filled', ...JSON.parse(s) });
-      if (req.method === 'POST' && p === '/positions/pos1/close') return send(res, 201, { id: 'o2', status: 'filled' });
+      if (p === '/markets/binance%7CBTCUSDT/quote' || p === '/markets/binance|BTCUSDT/quote') return send(res, 200, { bid: 96990, ask: 97010, mid: 97000 });
+      if (req.method === 'POST' && p === '/positions/pos1/close') {
+        const b = JSON.parse(s || '{}');
+        if (!(b.expected_price > 0)) { res.writeHead(422, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ error: { code: 'invalid_position_close', message: 'One or more request fields are invalid.', fields: ['expected_price'] } })); }
+        return send(res, 201, { id: 'o2', status: 'filled' });
+      }
       if (req.method === 'POST' && p === '/accounts/acc1/close-all-positions') { closeAllHits++; return closeAllHits === 1 ? send(res, 202, { status: 'running', total_count: 2, succeeded_count: 1 }, { 'Retry-After': '1' }) : send(res, 201, { status: 'completed', total_count: 2, succeeded_count: 2 }); }
       send(res, 404, null);
     });
@@ -128,7 +133,8 @@ test('a broken alert with a wrong passphrase is refused before anything else', a
 
 test('close finds the open position and closes it', async () => {
   await alert({ passphrase: 's3cret', action: 'close', symbol: 'BTCUSDT', id: 'c1' }); await wait(400);
-  assert.ok(calls.some((c) => c.method === 'POST' && c.path === '/positions/pos1/close' && c.key));
+  const c = calls.find((x) => x.method === 'POST' && x.path === '/positions/pos1/close');
+  assert.ok(c && c.key); assert.equal(c.body.type, 'market'); assert.equal(c.body.expected_price, 96990); assert.equal(c.body.client_order_id, 'tv:c1');
 });
 
 test('close_all keeps going through 202 until completed', async () => {
